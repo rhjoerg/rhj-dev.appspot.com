@@ -1,3 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" version="3.1">
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>maven</web-resource-name>
+			<url-pattern>/maven/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
 </web-app>
