@@ -4,7 +4,11 @@ public interface User {
 
 	String getUserid();
 	
-	String[] getRoles();
+	String getPassword();
+	
+	void setPassword(String password);
+	
+	String getRoles();
 	
 	boolean isInRoles(String... roles);
 	

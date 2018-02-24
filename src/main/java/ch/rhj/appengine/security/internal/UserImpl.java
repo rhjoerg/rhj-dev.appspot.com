@@ -13,11 +13,14 @@ public class UserImpl implements User, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final String userid;
-	private String roles = null;
+	private String password;
 	
-	public UserImpl(String userid) {
+	private String roles = "";
+	
+	public UserImpl(String userid, String password) {
 		
 		this.userid = Objects.requireNonNull(userid);
+		this.password = Objects.requireNonNull(password);
 	}
 
 	@Override
@@ -26,11 +29,29 @@ public class UserImpl implements User, Serializable {
 		return userid;
 	}
 	
+	@Override
+	public String getPassword() {
+
+		return password;
+	}
+
+	@Override
+	public void setPassword(String password) {
+
+		this.password = Objects.requireNonNull(password);
+	}
+
+	@Override
+	public String getRoles() {
+
+		return roles;
+	}
+
 	private synchronized TreeSet<String> getRoleSet() {
 		
 		TreeSet<String> result = new TreeSet<>();
 		
-		if (roles == null)
+		if (roles.isEmpty())
 			return result;
 		
 		for (String role : roles.split(","))
@@ -41,17 +62,9 @@ public class UserImpl implements User, Serializable {
 	
 	private synchronized void setRoleSet(TreeSet<String> roleSet) {
 		
-		this.roles = roleSet.isEmpty() ? null : roleSet.stream().collect(joining(","));
+		this.roles = roleSet.isEmpty() ? "" : roleSet.stream().collect(joining(","));
 	}
 
-	@Override
-	public synchronized String[] getRoles() {
-		
-		TreeSet<String> roleSet = getRoleSet();
-		
-		return roleSet.toArray(new String[roleSet.size()]);
-	}
-	
 	@Override
 	public boolean isInRoles(String... roles) {
 		

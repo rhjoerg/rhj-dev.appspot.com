@@ -1,68 +1,45 @@
 package ch.rhj.appengine.security.internal;
 
-import static java.util.stream.Collectors.joining;
+import org.apache.commons.codec.digest.DigestUtils;
 
-import java.util.stream.Stream;
-
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-
+import ch.rhj.appengine.security.SecurityRepository;
 import ch.rhj.appengine.security.SecurityService;
+import ch.rhj.appengine.security.SecurityServiceFactory;
 import ch.rhj.appengine.security.User;
 
 public class SecurityServiceImpl implements SecurityService {
 	
-	public final static SecurityServiceImpl INSTANCE = new SecurityServiceImpl();
+	public final static SecurityServiceImpl INSTANCE
+		= new SecurityServiceImpl(SecurityServiceFactory.getSecurityRepository());
+	
+	private final SecurityRepository repository;
 
-	private SecurityServiceImpl() {
+	private SecurityServiceImpl(SecurityRepository repository) {
 		
+		this.repository = repository;
 	}
 
 	@Override
-	public User getUser(String userid) {
+	public User getUser(String userid, String password) {
 		
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Key key = KeyFactory.createKey("User", userid);
+		User user = repository.getUser(userid);
 		
-		try {
+		if (user != null) {
 			
-			Entity entity = datastore.get(key);
-			String roles = (String) entity.getProperty("roles");
+			password = DigestUtils.sha1Hex(password);
 			
-			UserImpl user = new UserImpl(userid);
-			
-			if (roles.length() > 0)
-				user.addRoles(roles.split(","));
-			
-			return user;
-			
-		} catch (EntityNotFoundException e) {
-			
-			return null;
+			if (!password.equals(user.getPassword()))
+				user = null;
 		}
-	}
-
-	@Override
-	public User addUser(String userid, String... roles) {
-		
-		User user = getUser(userid);
-		
-		if (user == null)
-			user = new UserImpl(userid);
-		
-		user.addRoles(roles);
-		
-		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-		Key key = KeyFactory.createKey("User", userid);
-		Entity entity = new Entity(key);
-		
-		entity.setProperty("roles", Stream.of(user.getRoles()).collect(joining(",")));
-		datastore.put(entity);
 		
 		return user;
+	}
+
+	@Override
+	public User addUser(String userid, String password, String... roles) {
+		
+		password = DigestUtils.sha1Hex(password);
+		
+		return repository.setUser(userid, password, roles);
 	}
 }
