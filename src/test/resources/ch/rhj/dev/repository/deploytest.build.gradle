@@ -1,0 +1,24 @@
+
+apply plugin: 'maven-publish'
+
+group 'com.appspot.rhj-dev'
+version '0.1.0'
+
+publishing {
+
+	repositories {
+	
+		maven {
+		
+			url "$buildDir/maven"
+		}
+		
+		publications {
+		
+			maven(MavenPublication) {
+			
+				artifact 'build.gradle'
+			}
+		}
+	}
+}
