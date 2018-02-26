@@ -46,6 +46,11 @@ dependencies {
 	testCompile group: 'commons-io', name: 'commons-io', version: '2.6'
 }
 
+test {
+	
+	exclude 'ch/rhj/dev/integration/**'
+}
+
 appengine {
 
 	run {
